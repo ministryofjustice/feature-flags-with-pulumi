@@ -1,6 +1,7 @@
 encryptionsalt: v1:VCo+xZbCtmc=:v1:8za17CaKcZreqEWU:5ECxOfaQPekyZAewgOGHoTbvnXibSg==
 config:
   aws:region: eu-west-1
-  infra:data: 
-    use_new_infrastructure: false
-    bucket: my-prod-bucket
+  infra:data:
+    buckets:
+      - my-bucket-1
+      - my-bucket-2

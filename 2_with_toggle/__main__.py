@@ -1,23 +1,22 @@
 """An AWS Python Pulumi program"""
 
-from pulumi import Config, export
+from pulumi import Config, export, get_stack
 from pulumi_aws import s3
 
 config = Config()
 data = config.require_object("data")
 use_new_infrastructure = data['use_new_infrastructure']
+stack = get_stack()
 
-# Create an AWS resource (S3 Bucket)
-if data.get("bucket"):
-    bucket = s3.Bucket(data["bucket"])
-elif data.get("buckets"):
+if use_new_infrastructure:
     buckets = []
     for bucket in data["buckets"]:
-        buckets.append(s3.Bucket(bucket))
+        buckets.append(s3.Bucket(f"{bucket}-{stack}"))
+else:
+    bucket = s3.Bucket(f"{data['bucket']}-{stack}")
 
-# Export the name of the bucket
 if use_new_infrastructure:
     for bucket_name,bucket in zip(data["buckets"],buckets):
-        export(bucket_name, bucket.id)
+        export(f"{bucket_name}-name", bucket.id)
 else:
-    export(data["bucket"], bucket.id)
+    export("bucket_name", bucket.id)
