@@ -1,0 +1,18 @@
+encryptionsalt: v1:VCo+xZbCtmc=:v1:8za17CaKcZreqEWU:5ECxOfaQPekyZAewgOGHoTbvnXibSg==
+config:
+  aws:region: eu-west-1
+  infra:feature_flags:
+    multiple_buckets: true
+    cors: true
+  infra:buckets:
+    - name: my-bucket-1
+      fixed: true
+      versioning:
+        enabled: true
+    - name: my-bucket-2
+      fixed: true
+      versioning:
+        enabled: false
+  infra:cors:
+    allowed_origins: ["https://s3-website-test.mydomain.com"]
+    max_age_seconds: 3000

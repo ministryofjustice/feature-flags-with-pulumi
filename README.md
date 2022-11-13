@@ -102,9 +102,9 @@ Resources:
 
 `prod` remains unchanged and prints the same message as previous.
 
-### With CORS
+### Enable cross-origin resource sharing (CORS)
 
-We optionally enable CORS on the buckets using the same variables
+We optionally enable CORS on the buckets using the same variables:
 
 ```
 Updating (dev):
@@ -124,7 +124,34 @@ Resources:
 
 `prod` remains unchanged and prints the same message as previous.
 
+### Deploy features to prod
 
+`dev` remains unchanged, however the prod is updated:
+
+```
+Updating (prod):
+     Type                 Name              Status      
+     pulumi:pulumi:Stack  infra-prod                    
+ +   ├─ aws:s3:Bucket     my-bucket-2-prod  created     
+ +   ├─ aws:s3:Bucket     my-bucket-1-prod  created     
+ -   └─ aws:s3:Bucket     my-bucket-prod    deleted     
+ 
+Outputs:
+  - bucket_name                                                                  : "my-bucket-prod-e246589"
+  + {'fixed': True, 'name': 'my-bucket-1', 'versioning': {'enabled': True}}-name : "my-bucket-1-prod-soumaya.mauthoor"
+  + {'fixed': True, 'name': 'my-bucket-2', 'versioning': {'enabled': False}}-name: "my-bucket-2-prod-soumaya.mauthoor"
+
+Resources:
+    + 2 created
+    - 1 deleted
+    3 changes. 1 unchanged
+```
+
+### Remove the flags
+
+The flags must be removed once the features have been deployed to prod and work as expected.
+
+This time neither stacks show any changes during deployment.
 
 ## References
 
