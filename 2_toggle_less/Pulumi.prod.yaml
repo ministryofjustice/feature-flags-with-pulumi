@@ -1,8 +1,6 @@
 encryptionsalt: v1:VCo+xZbCtmc=:v1:8za17CaKcZreqEWU:5ECxOfaQPekyZAewgOGHoTbvnXibSg==
 config:
   aws:region: eu-west-1
-  infra:feature_flags:
-    multiple_buckets: false
   infra:bucket: 
     name: my-bucket
     fixed: false
