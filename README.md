@@ -1,4 +1,4 @@
-# Features Flags (AKA Toggles) with Pulumi
+# Feature Flags (AKA Toggles) with Pulumi
 
 ## Introduction
 
