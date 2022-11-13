@@ -2,157 +2,188 @@
 
 ## Introduction
 
-Feature flags (or toggles) is a software engineering technique which can be used with GitHub flow to limit long-living feature branches[1]. This encourages developers to commit early and often, and highlight issues earlier in the development cycle. It can also be used to easily disable features or resources which are causing issues, instead of reverting the change. 
+Feature flags (or toggles) is a software engineering technique which has many [advantages](https://martinfowler.com/articles/feature-toggles.html):
 
-However, as with any design patterns, feature flags need to be handled carefully. Having too many feature flags can be confusing, so they should be used sparingly. You also need to be diligent to remove feature flags once the feature has been fully enabled.
+- Limit long-living feature branches
+- Encourages developers to commit early and often
+- Highlight issues earlier in the development cycle
+- Easily disable features or resources which are causing issues, instead of reverting the change
 
-There are multiple online resources about using features flags with Terraform[2]. However I couldn't find similar resources for pulumi. This could be because pulumi encourages the use GitHub Flow[4], with a branch per stack/environment[5]. This makes the need for feature flags less relevant because changes can be independently deployed to the different environments as code is promoted to the different branches. It's also difficult to remove feature flags from multiple branches.
+However, as with any design patterns, feature flags introduce complexity and need to be handled carefully:
 
-However, it is possible to use GitFlow, with a single main branch [6] which is sequentially deployed to the different stacks/environments once a feature is merged in. This repo explains how and when to use feature flags with a pulumi AWS python project using a simple S3 bucket example. It also calls a GitHub custom action for flagging feature flags which are obsolete.
+- Having too many feature flags can be confusing, so they should be used sparingly
+- You need to be diligent to remove feature flags once the feature has been fully enabled
 
-This repo assumes you are already familiar with [infrastructure as code](), [pulumi](https://www.pulumi.com/docs/) and specifically the pulumi [Bucket](https://www.pulumi.com/registry/packages/aws/api-docs/s3/bucket/) resource. You'll need to have access to an AWS account to deploy the bucket, however you should be able to follow the explanation without deploying to AWS. 
+Feature flags can be used with [IAC (Infrastructure As Code)](https://en.wikipedia.org/wiki/Infrastructure_as_code) projects and has been used with [Terraform](https://build5nines.com/terraform-feature-flags-environment-toggle-design-patterns/). This repo demos how and when to use feature flags with [pulumi](https://www.pulumi.com/docs/). This demo is relevant to pulumi projects using [GitHub-Flow](https://docs.github.com/en/get-started/quickstart/github-flow) for branch management, with a single main branch which is sequentially deployed to the different pulumi stacks once feature branches are merged in. Feature flags are [recommended by GitHub](https://github.blog/2021-04-27-ship-code-faster-safer-feature-flags/) when using GitHub flow.
 
-I will not be discusing how to set up a CI/CD pipeline and the relevant best practice to limit the scope of this repository.
+Pulumi is also compatible with [Git-Flow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) for branch management, with one [branch-per-stack](https://www.pulumi.com/docs/guides/continuous-delivery/). However, feature flags are less relevant to Git-Flow because changes can be independently deployed to the different environments as code is promoted to the different branches. It is also difficult to remove feature flags from multiple branches.
+
+This repo uses an AWS python project with a simple S3 bucket example but the concepts could be applied to other languages. The example is somewhat contrived to simplify the code, but should help as a basis for applying to more complex, real-life examples. The process for automating the deployment changes is also out-of-scope for the sake of clarity.
+
+This repo assumes you are already familiar with pulumi and specifically the pulumi [Bucket](https://www.pulumi.com/registry/packages/aws/api-docs/s3/bucket/) resource. You'll need to have access to an AWS account to deploy the bucket, however you should be able to follow the explanation without deploying to AWS. 
 
 ## Structure
 
-The repo defines the infrastructure for a fictional service, which consists of bucket(s) for simplicity. The repo uses a monolithic project named `infra`. The repo deploys resources against two stacks/environments: `dev` and `prod` (see [Organizing Projects and Stacks](https://www.pulumi.com/docs/guides/organizing-projects-stacks/) for more details).
+This repo defines the infrastructure for a fictional service, which consists only of buckets for simplicity. The repo uses a monolithic project named `infra`. The repo deploys resources against two stacks/environments: `dev` and `prod` (see [Organizing Projects and Stacks](https://www.pulumi.com/docs/guides/organizing-projects-stacks/) for more details).
 
-The repo is split up into multiple directories to show the state of the code at different stages. Think of each directory as the state of the main branch after a feature branch has been merged to main. 
+The repo is split up into multiple directories. All directories refer to the same `infra` pulumi project and deploy to the same `dev` and `prod` stacks. The directories are supposed to show the state of the code after a feature branch has been merged to main. The prefix indicates the order of the stages. I could have changed the structure of the project as follows and saved each stage as a separate commit:
 
-All directories refer to the same `infra` pulumi project and deploy to the same `dev` and `prod` stacks.
+```
+|- infra
+|   |- __main__.py
+|   |- Pulumi.dev.yaml
+|   |- Pulumi.prod.yaml
+|   |- Pulumi.yaml
+|- README.md
+|- requirements.txt
+```
+
+However I thought it was easier to switch between directories instead of switching between commits.
 
 ## Explanation
 
-### 1_before_toggle
+### 1. Create Bucket
 
-The service consists of a single bucket. 
+At this stage the service consists of a single bucket which has been created in both stacks.
 
-Pulumi up will print the following:
+Running a `pulumi up` prints the following output:
 
-```
-Updating (dev):
-     Type                 Name           Status      
- +   pulumi:pulumi:Stack  infra-dev      created     
- +   └─ aws:s3:Bucket     my-bucket-dev  created     
+<details>
+  <summary>Click me</summary>
+
+    Updating (dev):
+        Type                 Name           Status      
+    +   pulumi:pulumi:Stack  infra-dev      created     
+    +   └─ aws:s3:Bucket     my-bucket-dev  created
+     
+    Outputs:
+        bucket_name: "my-bucket-dev-9be74da"
+
+    Resources:
+        + 2 created
+
+</details>
+
+and similarly for the prod stack.
+
+### 2. Enable versioning and rename
+
+The service still consists of a single bucket, but the bucket `dev` has been renamed and versioning is enabled. Since versioning is disabled and the name variable is set to none by default, I can deploy the change to `dev` only without using a feature flag.
+Note that in a real example, you would probably use [aliases](https://www.pulumi.com/docs/intro/concepts/resources/options/aliases/) to rename the bucket instead of recreating it.
+
+Running a `pulumi up` shows that the bucket is recreated in `dev` but no changes are detected in `prod`:
+
+<details>
+  <summary>Click me</summary>
+
+    Updating (dev):
+        Type                 Name           Status       Info
+        pulumi:pulumi:Stack  infra-dev                   
+    +-  └─ aws:s3:Bucket     my-bucket-dev  replaced     [diff: +bucketPrefix~versioning]
+    
+    Outputs:
+    ~ bucket_name: "my-bucket-dev-9be74da" => => "my-bucket-dev-soumaya.mauthoor"
+
+    Resources:
+        +-1 replaced
+        1 unchanged
  
-Outputs:
-    bucket_name: "my-bucket-dev-9be74da"
+    Updating (prod):
+        Type                 Name        Status     
+        pulumi:pulumi:Stack  infra-prod             
+    
+    Outputs:
+        bucket_name: "my-bucket-prod-e246589"
 
-Resources:
-    + 2 created
-```
+    Resources:
+        2 unchanged
 
-and the same for the prod stack
+</details>
 
-### Toggle Less
+### 3. Multiple Buckets
 
-The service still consists of a single bucket, but versioning is now enabled on the dev stack. This is achieved without using a feature flag.
+The service now needs two buckets, and uses a feature flag to make sure the change is only deployed to `dev`. Notice how the feature flags are stored in a distinct dictionary in the stack config files. This means all feature flags are stored in one location per stack and can be easily copied over to the other stacks.
 
-```
-Updating (dev):
-     Type                 Name           Status       Info
-     pulumi:pulumi:Stack  infra-dev                   
- +-  └─ aws:s3:Bucket     my-bucket-dev  replaced     [diff: +bucketPrefix~versioning]
- 
-Outputs:
-  ~ bucket_name: "my-bucket-dev-9be74da" => => "my-bucket-dev-soumaya.mauthoor"
+Running a `pulumi up` shows that a second bucket is created in `dev` but no changes are detected in `prod`:
 
-Resources:
-    +-1 replaced
-    1 unchanged
-```
+<details>
+  <summary>Click me</summary>
 
-No changes are recorded for the prod environment, even with the code changes:
+    Updating (dev):
+        Type                 Name             Status      
+        pulumi:pulumi:Stack  infra-dev                    
+    +   ├─ aws:s3:Bucket     my-bucket-2-dev  created     
+    +   ├─ aws:s3:Bucket     my-bucket-1-dev  created     
+    -   └─ aws:s3:Bucket     my-bucket-dev    deleted     
+    
+    Outputs:
+    - bucket_name                                                                  : "my-bucket-dev-soumaya.mauthoor"
+    + {'fixed': True, 'name': 'my-bucket-1', 'versioning': {'enabled': True}}-name : "my-bucket-1-dev-soumaya.mauthoor"
+    + {'fixed': True, 'name': 'my-bucket-2', 'versioning': {'enabled': False}}-name: "my-bucket-2-dev-soumaya.mauthoor"
 
-```
-Updating (prod):
-     Type                 Name        Status     
-     pulumi:pulumi:Stack  infra-prod             
- 
-Outputs:
-    bucket_name: "my-bucket-prod-e246589"
+    Resources:
+        + 2 created
+        - 1 deleted
+        3 changes. 1 unchanged
 
-Resources:
-    2 unchanged
-```
+</details>
 
-### With Toggle
+### 4. Enable cross-origin resource sharing (CORS)
 
-The service is migrating to two buckets, which is toggle on for the dev stack only
+The service requires [CORS](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cors.html) to be enabled on the buckets. This has been selectively deployed to `dev` only using a second feature flag.
+Note that in a real example you might want to modify the code to pass different CORS config variables to the different buckets.
 
-```
-Updating (dev):
-     Type                 Name             Status      
-     pulumi:pulumi:Stack  infra-dev                    
- +   ├─ aws:s3:Bucket     my-bucket-2-dev  created     
- +   ├─ aws:s3:Bucket     my-bucket-1-dev  created     
- -   └─ aws:s3:Bucket     my-bucket-dev    deleted     
- 
-Outputs:
-  - bucket_name                                                                  : "my-bucket-dev-soumaya.mauthoor"
-  + {'fixed': True, 'name': 'my-bucket-1', 'versioning': {'enabled': True}}-name : "my-bucket-1-dev-soumaya.mauthoor"
-  + {'fixed': True, 'name': 'my-bucket-2', 'versioning': {'enabled': False}}-name: "my-bucket-2-dev-soumaya.mauthoor"
+Running a `pulumi up` shows that both buckets are updated in `dev` but no changes are detected in `prod`:
 
-Resources:
-    + 2 created
-    - 1 deleted
-    3 changes. 1 unchanged
-```
+<details>
+  <summary>Click me</summary>
 
-`prod` remains unchanged and prints the same message as previous.
+    Updating (dev):
+        Type                 Name             Status      Info
+        pulumi:pulumi:Stack  infra-dev                    
+    ~   ├─ aws:s3:Bucket     my-bucket-2-dev  updated     [diff: ~corsRules]
+    ~   └─ aws:s3:Bucket     my-bucket-1-dev  updated     [diff: ~corsRules]
+    
+    Outputs:
+        {'fixed': True, 'name': 'my-bucket-1', 'versioning': {'enabled': True}}-name : "my-bucket-1-dev-soumaya.mauthoor"
+        {'fixed': True, 'name': 'my-bucket-2', 'versioning': {'enabled': False}}-name: "my-bucket-2-dev-soumaya.mauthoor"
 
-### Enable cross-origin resource sharing (CORS)
+    Resources:
+        ~ 2 updated
+        1 unchanged
 
-We optionally enable CORS on the buckets using the same variables:
+</details>
 
-```
-Updating (dev):
-     Type                 Name             Status      Info
-     pulumi:pulumi:Stack  infra-dev                    
- ~   ├─ aws:s3:Bucket     my-bucket-2-dev  updated     [diff: ~corsRules]
- ~   └─ aws:s3:Bucket     my-bucket-1-dev  updated     [diff: ~corsRules]
- 
-Outputs:
-    {'fixed': True, 'name': 'my-bucket-1', 'versioning': {'enabled': True}}-name : "my-bucket-1-dev-soumaya.mauthoor"
-    {'fixed': True, 'name': 'my-bucket-2', 'versioning': {'enabled': False}}-name: "my-bucket-2-dev-soumaya.mauthoor"
+### 5. Deploy features to `prod`
 
-Resources:
-    ~ 2 updated
-    1 unchanged
-```
+All new features have been tested and/or reviewed in `dev` and are now deployed to `prod`. Note that the feature flags are still in place in case we need to revert the change.
 
-`prod` remains unchanged and prints the same message as previous.
+Running a `pulumi up` shows that two buckets are created in `prod` but no changes are detected in `dev`:
 
-### Deploy features to prod
+<details>
+  <summary>Click me</summary>
 
-`dev` remains unchanged, however the prod is updated:
+    Updating (prod):
+        Type                 Name              Status      
+        pulumi:pulumi:Stack  infra-prod                    
+    +   ├─ aws:s3:Bucket     my-bucket-2-prod  created     
+    +   ├─ aws:s3:Bucket     my-bucket-1-prod  created     
+    -   └─ aws:s3:Bucket     my-bucket-prod    deleted     
+    
+    Outputs:
+    - bucket_name                                                                  : "my-bucket-prod-e246589"
+    + {'fixed': True, 'name': 'my-bucket-1', 'versioning': {'enabled': True}}-name : "my-bucket-1-prod-soumaya.mauthoor"
+    + {'fixed': True, 'name': 'my-bucket-2', 'versioning': {'enabled': False}}-name: "my-bucket-2-prod-soumaya.mauthoor"
 
-```
-Updating (prod):
-     Type                 Name              Status      
-     pulumi:pulumi:Stack  infra-prod                    
- +   ├─ aws:s3:Bucket     my-bucket-2-prod  created     
- +   ├─ aws:s3:Bucket     my-bucket-1-prod  created     
- -   └─ aws:s3:Bucket     my-bucket-prod    deleted     
- 
-Outputs:
-  - bucket_name                                                                  : "my-bucket-prod-e246589"
-  + {'fixed': True, 'name': 'my-bucket-1', 'versioning': {'enabled': True}}-name : "my-bucket-1-prod-soumaya.mauthoor"
-  + {'fixed': True, 'name': 'my-bucket-2', 'versioning': {'enabled': False}}-name: "my-bucket-2-prod-soumaya.mauthoor"
+    Resources:
+        + 2 created
+        - 1 deleted
+        3 changes. 1 unchanged
 
-Resources:
-    + 2 created
-    - 1 deleted
-    3 changes. 1 unchanged
-```
+</details>
 
-### Remove the flags
+### 6. Remove the feature flags
 
-The flags must be removed once the features have been deployed to prod and work as expected.
+All new features have been tested and reviewed in `prod` and the feature flags have now been removed.
 
-This time neither stacks show any changes during deployment.
-
-## References
-
-[1](https://github.blog/2021-04-27-ship-code-faster-safer-feature-flags/)
+This time, neither stacks show any changes when running a `pulumi up`.
