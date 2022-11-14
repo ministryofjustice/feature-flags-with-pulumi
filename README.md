@@ -24,7 +24,9 @@ This repo assumes you are already familiar with pulumi and specifically the pulu
 
 ## Structure
 
-This repo defines the infrastructure for a fictional service, which consists only of buckets for simplicity. The repo uses a monolithic project named `infra`. The repo deploys resources against two stacks/environments: `dev` and `prod` (see [Organizing Projects and Stacks](https://www.pulumi.com/docs/guides/organizing-projects-stacks/) for more details).
+This repo defines the infrastructure for a fictional service, which consists only of buckets for simplicity. The repo uses a monolithic project named `infra`, but the concepts are compatible with micro-stacks (see [Organizing Projects and Stacks](https://www.pulumi.com/docs/guides/organizing-projects-stacks/) for more details). In fact, having micro-stacks makes it easier to manage multiple feature flags.
+ 
+The repo deploys resources against only two stacks/environments for simplicity: `dev` and `prod`. It is possible to use more stacks.
 
 The repo is split up into multiple directories. All directories refer to the same `infra` pulumi project and deploy to the same `dev` and `prod` stacks. The directories are supposed to show the state of the code after a feature branch has been merged to main. The prefix indicates the order of the stages. I could have changed the structure of the project as follows and saved each stage as a separate commit:
 
@@ -42,7 +44,7 @@ However I thought it was easier to switch between directories instead of switchi
 
 ## Explanation
 
-### 1. Create Bucket
+### 1. Create bucket
 
 At this stage the service consists of a single bucket which has been created in both stacks.
 
@@ -66,10 +68,15 @@ Running a `pulumi up` prints the following output:
 
 and similarly for the prod stack.
 
-### 2. Enable versioning and rename
+### 2. Modify bucket
 
-The service still consists of a single bucket, but the bucket `dev` has been renamed and versioning is enabled. Since versioning is disabled and the name variable is set to none by default, I can deploy the change to `dev` only without using a feature flag.
-Note that in a real example, you would probably use [aliases](https://www.pulumi.com/docs/intro/concepts/resources/options/aliases/) to rename the bucket instead of recreating it.
+The service still consists of a single bucket, but the bucket properties on the `dev` have been updated:
+
+- The name is deterministic. Since the `bucket` variable is set to none by default, I can deploy the change to `dev` only without using a feature flag. Note that in a real example, you would probably use [aliases](https://www.pulumi.com/docs/intro/concepts/resources/options/aliases/) to rename the bucket instead of recreating it.
+  
+- Versioning is enabled. Since versioning is disabled by default, I can also deploy the change to `dev` only without using a feature flag.
+
+- Cross-account resource sharing [CORS](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cors.html) is enabled using a `cors` feature flag. The feature flag is stored in a distinct dictionary in the stack config files. This means all feature flags are stored in one location per stack and can be tracked more easily.
 
 Running a `pulumi up` shows that the bucket is recreated in `dev` but no changes are detected in `prod`:
 
@@ -79,7 +86,7 @@ Running a `pulumi up` shows that the bucket is recreated in `dev` but no changes
     Updating (dev):
         Type                 Name           Status       Info
         pulumi:pulumi:Stack  infra-dev                   
-    +-  └─ aws:s3:Bucket     my-bucket-dev  replaced     [diff: +bucketPrefix~versioning]
+    +-  └─ aws:s3:Bucket     my-bucket-dev  replaced     [diff: ~bucket,corsRules,versioning]
     
     Outputs:
     ~ bucket_name: "my-bucket-dev-9be74da" => => "my-bucket-dev-soumaya.mauthoor"
@@ -100,9 +107,9 @@ Running a `pulumi up` shows that the bucket is recreated in `dev` but no changes
 
 </details>
 
-### 3. Multiple Buckets
+### 3. Multiple buckets
 
-The service now needs two buckets, and uses a feature flag to make sure the change is only deployed to `dev`. Notice how the feature flags are stored in a distinct dictionary in the stack config files. This means all feature flags are stored in one location per stack and can be easily copied over to the other stacks.
+The service now needs two buckets, and uses the `multiple_buckets` feature flag to make sure the change is only deployed to `dev`. 
 
 Running a `pulumi up` shows that a second bucket is created in `dev` but no changes are detected in `prod`:
 
@@ -128,10 +135,9 @@ Running a `pulumi up` shows that a second bucket is created in `dev` but no chan
 
 </details>
 
-### 4. Enable cross-origin resource sharing (CORS)
+### 4. Update CORS
 
-The service requires [CORS](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cors.html) to be enabled on the buckets. This has been selectively deployed to `dev` only using a second feature flag.
-Note that in a real example you might want to modify the code to pass different CORS config variables to the different buckets.
+After testing in `dev`, you realised that you have mistakenly allowed all origins to access your bucket. Thankfully, this only impacted the `dev` bucket, since the feature was only deployed to `dev`. The CORS origin is updated and restricted to a single origin.
 
 Running a `pulumi up` shows that both buckets are updated in `dev` but no changes are detected in `prod`:
 
@@ -141,8 +147,8 @@ Running a `pulumi up` shows that both buckets are updated in `dev` but no change
     Updating (dev):
         Type                 Name             Status      Info
         pulumi:pulumi:Stack  infra-dev                    
-    ~   ├─ aws:s3:Bucket     my-bucket-2-dev  updated     [diff: ~corsRules]
-    ~   └─ aws:s3:Bucket     my-bucket-1-dev  updated     [diff: ~corsRules]
+    ~   ├─ aws:s3:Bucket     my-bucket-1-dev  updated     [diff: ~corsRules]
+    ~   └─ aws:s3:Bucket     my-bucket-2-dev  updated     [diff: ~corsRules]
     
     Outputs:
         {'fixed': True, 'name': 'my-bucket-1', 'versioning': {'enabled': True}}-name : "my-bucket-1-dev-soumaya.mauthoor"
@@ -156,7 +162,7 @@ Running a `pulumi up` shows that both buckets are updated in `dev` but no change
 
 ### 5. Deploy features to `prod`
 
-All new features have been tested and/or reviewed in `dev` and are now deployed to `prod`. Note that the feature flags are still in place in case we need to revert the change.
+All new features have been tested and/or reviewed in `dev` and are now deployed to `prod`. Note that the feature flags are still in place in case you need to revert the change.
 
 Running a `pulumi up` shows that two buckets are created in `prod` but no changes are detected in `dev`:
 

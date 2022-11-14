@@ -3,6 +3,7 @@ config:
   aws:region: eu-west-1
   infra:feature_flags:
     multiple_buckets: false
+    cors: false
   infra:bucket:
     name: my-bucket
     fixed: false
