@@ -7,9 +7,9 @@ import getpass
 config = Config()
 stack = get_stack()
 user = getpass.getuser()
-feature_flags = config.require_object("feature_flags")
+feature_flags = config.get_object("feature_flags")
 
-if feature_flags["cors"]:
+if feature_flags.get("cors"):
     cors_config = config.require_object("cors")
     cors_rules = [
         s3.BucketCorsRuleArgs(
@@ -26,7 +26,7 @@ if feature_flags["cors"]:
 else:
     cors_rules = None
 
-if feature_flags["multiple_buckets"]:
+if feature_flags.get("multiple_buckets"):
     bucket_config = config.require_object("buckets")
     buckets = []
     for bucket in bucket_config:
@@ -50,7 +50,7 @@ else:
         cors_rules=cors_rules,
     )
 
-if feature_flags["multiple_buckets"]:
+if feature_flags.get("multiple_buckets"):
     for bucket_name, bucket in zip(bucket_config, buckets):
         export(f"{bucket_name}-name", bucket.id)
 else:

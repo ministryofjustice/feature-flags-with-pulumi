@@ -9,10 +9,10 @@ config = Config()
 bucket_config = config.require_object("bucket")
 stack = get_stack()
 user = getpass.getuser()
-feature_flags = config.require_object("feature_flags")
+feature_flags = config.get_object("feature_flags",{})
 
 cors_rules = None
-if feature_flags["cors"]:
+if feature_flags.get("cors"):
     cors_rules = [
         s3.BucketCorsRuleArgs(
             allowed_headers=["*"],

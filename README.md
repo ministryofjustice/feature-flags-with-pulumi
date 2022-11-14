@@ -42,6 +42,8 @@ The repo is split up into multiple directories. All directories refer to the sam
 
 However I thought it was easier to switch between directories instead of switching between commits.
 
+In the repo the feature flags are defined in the pulumi stack [config](https://www.pulumi.com/docs/intro/concepts/config/) files `Pulumi.<stack-name>.yml`. The feature flags are stored in a distinct dictionary under feature_flags. This means all feature flags are stored in one location per stack and can be tracked more easily. The feature flags are disabled by default to make sure the features are not deployed to `prod` by mistake.
+
 ## Explanation
 
 ### 1. Create bucket
@@ -76,7 +78,7 @@ The service still consists of a single bucket, but the bucket properties on the 
   
 - Versioning is enabled. Since versioning is disabled by default, I can also deploy the change to `dev` only without using a feature flag.
 
-- Cross-account resource sharing [CORS](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cors.html) is enabled using a `cors` feature flag. The feature flag is stored in a distinct dictionary in the stack config files. This means all feature flags are stored in one location per stack and can be tracked more easily.
+- Cross-account resource sharing [CORS](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cors.html) is enabled using a `cors` feature flag. 
 
 Running a `pulumi up` shows that the bucket is recreated in `dev` but no changes are detected in `prod`:
 
@@ -162,7 +164,7 @@ Running a `pulumi up` shows that both buckets are updated in `dev` but no change
 
 ### 5. Deploy features to `prod`
 
-All new features have been tested and/or reviewed in `dev` and are now deployed to `prod`. Note that the feature flags are still in place in case you need to revert the change.
+All new features have been tested and/or reviewed in `dev` and are now deployed to `prod`. Note that the feature flags are still in place in case you need to revert the change. You could have also decided to deply the features independently.
 
 Running a `pulumi up` shows that two buckets are created in `prod` but no changes are detected in `dev`:
 
