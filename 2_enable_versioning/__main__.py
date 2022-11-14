@@ -12,7 +12,9 @@ user = getpass.getuser()
 
 bucket = s3.Bucket(
     f"{bucket_config['name']}-{stack}",
-    bucket=f"{bucket_config['name']}-{stack}-{user}" if bucket_config['fixed'] else None,
+    bucket=f"{bucket_config['name']}-{stack}-{user}"
+    if bucket_config["fixed"]
+    else None,
     versioning=s3.BucketVersioningArgs(enabled=bucket_config["versioning"]["enabled"]),
 )
 
