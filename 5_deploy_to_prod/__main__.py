@@ -9,6 +9,7 @@ stack = get_stack()
 user = getpass.getuser()
 feature_flags = config.get_object("feature_flags")
 
+cors_rules = None
 if feature_flags.get("cors"):
     cors_config = config.require_object("cors")
     cors_rules = [
@@ -23,8 +24,6 @@ if feature_flags.get("cors"):
             max_age_seconds=cors_config["max_age_seconds"],
         )
     ]
-else:
-    cors_rules = None
 
 if feature_flags.get("multiple_buckets"):
     bucket_config = config.require_object("buckets")
