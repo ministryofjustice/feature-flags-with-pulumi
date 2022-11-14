@@ -11,18 +11,20 @@ feature_flags = config.require_object("feature_flags")
 
 if feature_flags["cors"]:
     cors_config = config.require_object("cors")
-    cors_rules = [s3.BucketCorsRuleArgs(
-        allowed_headers=["*"],
-        allowed_methods=[
-            "PUT",
-            "POST",
-        ],
-        allowed_origins=cors_config["allowed_origins"],
-        expose_headers=["ETag"],
-        max_age_seconds=cors_config["max_age_seconds"],
-        )]
+    cors_rules = [
+        s3.BucketCorsRuleArgs(
+            allowed_headers=["*"],
+            allowed_methods=[
+                "PUT",
+                "POST",
+            ],
+            allowed_origins=cors_config["allowed_origins"],
+            expose_headers=["ETag"],
+            max_age_seconds=cors_config["max_age_seconds"],
+        )
+    ]
 else:
-    cors_rules = None 
+    cors_rules = None
 
 if feature_flags["multiple_buckets"]:
     bucket_config = config.require_object("buckets")
@@ -32,7 +34,7 @@ if feature_flags["multiple_buckets"]:
             f"{bucket['name']}-{stack}",
             bucket=f"{bucket['name']}-{stack}-{user}" if bucket["fixed"] else None,
             versioning=s3.BucketVersioningArgs(enabled=bucket["versioning"]["enabled"]),
-            cors_rules= cors_rules
+            cors_rules=cors_rules,
         )
         buckets.append(resource)
 else:
@@ -45,7 +47,7 @@ else:
         versioning=s3.BucketVersioningArgs(
             enabled=bucket_config["versioning"]["enabled"]
         ),
-        cors_rules= cors_rules
+        cors_rules=cors_rules,
     )
 
 if feature_flags["multiple_buckets"]:

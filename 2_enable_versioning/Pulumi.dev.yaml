@@ -1,7 +1,7 @@
 encryptionsalt: v1:EKFbgrQbPI8=:v1:MzAyafF3DkMJJfCa:Z6NUt3J+AbyYfVOHabbLsdxlqeOC8g==
 config:
   aws:region: eu-west-1
-  infra:bucket: 
+  infra:bucket:
     name: my-bucket
     fixed: true
     versioning:

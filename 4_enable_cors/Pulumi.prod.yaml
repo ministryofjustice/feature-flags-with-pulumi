@@ -4,7 +4,7 @@ config:
   infra:feature_flags:
     multiple_buckets: false
     cors: false
-  infra:bucket: 
+  infra:bucket:
     name: my-bucket
     fixed: false
     versioning:

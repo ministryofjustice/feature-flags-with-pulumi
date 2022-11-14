@@ -3,7 +3,7 @@ config:
   aws:region: eu-west-1
   infra:feature_flags:
     multiple_buckets: false
-  infra:bucket: 
+  infra:bucket:
     name: my-bucket
     fixed: false
     versioning:
