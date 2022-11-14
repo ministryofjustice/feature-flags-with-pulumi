@@ -42,7 +42,7 @@ The repo is split up into multiple directories. All directories refer to the sam
 
 However I thought it was easier to switch between directories instead of switching between commits.
 
-In the repo feature flags are defined in the pulumi stack [config](https://www.pulumi.com/docs/intro/concepts/config/) files `Pulumi.<stack-name>.yml`. Feature flags are stored in a distinct dictionary under feature_flags. This means all feature flags are stored in one location per stack and can be tracked more easily. Feature flags are assumed to be disabled by default to make sure features are not deployed to `prod` by mistake.
+The repo defines the feature flags in the pulumi stack [config](https://www.pulumi.com/docs/intro/concepts/config/) files `Pulumi.<stack-name>.yml`. The feature flags are stored under the feature_flags object. This means all feature flags are stored in one location per stack and can be tracked more easily. If undefined, the code assumes the feature flags are disabled to ensure features are not deployed to `prod` by mistake.
 
 ## Explanation
 
