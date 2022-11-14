@@ -139,7 +139,7 @@ Running a `pulumi up` shows that a second bucket is created in `dev` but no chan
 
 ### 4. Update CORS
 
-After testing in `dev`, you realised that you have mistakenly allowed all origins to access your bucket. Thankfully, this only impacted the `dev` bucket, since the feature was only deployed to `dev`. The CORS origin is updated and restricted to a single origin.
+After testing in `dev`, you realised that you have mistakenly allowed all origins to access your bucket. Thankfully, this only impacted the `dev` bucket, since the feature was only deployed to `dev`. The CORS origin is now restricted to a single origin which is configurable.
 
 Running a `pulumi up` shows that both buckets are updated in `dev` but no changes are detected in `prod`:
 
