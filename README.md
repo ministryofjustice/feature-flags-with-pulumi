@@ -74,7 +74,7 @@ and similarly for the prod stack.
 
 The service still consists of a single bucket, but the bucket properties on the `dev` have been updated:
 
-- The name is deterministic. Since the `bucket` variable is set to none by default, I can deploy the change to `dev` only without using a feature flag. Note that in a real example, you would probably use [aliases](https://www.pulumi.com/docs/intro/concepts/resources/options/aliases/) to rename the bucket instead of recreating it.
+- The name is deterministic. Since the `bucket` variable is set to `None` by default, I can deploy the change to `dev` only without using a feature flag by explicitely setting the `bucket` variable to `None` if undefined in the stack config file.
   
 - Versioning is enabled. Since versioning is disabled by default, I can also deploy the change to `dev` only without using a feature flag.
 
