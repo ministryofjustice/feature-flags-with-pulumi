@@ -2,14 +2,14 @@ encryptionsalt: v1:EKFbgrQbPI8=:v1:MzAyafF3DkMJJfCa:Z6NUt3J+AbyYfVOHabbLsdxlqeOC
 config:
   aws:region: eu-west-1
   infra:buckets:
-    - name: my-bucket-1
-      fixed: true
+    - name: my-bucket
       versioning:
         enabled: true
-    - name: my-bucket-2
-      fixed: true
+      cors:
+        allowed_methods:
+          - "PUT"
+          - "POST"
+        allowed_origins: ['*']
+    - name: my-bucket-1
       versioning:
         enabled: false
-  infra:cors:
-    allowed_origins: ["https://s3-website-test.mydomain.com"]
-    max_age_seconds: 3000
