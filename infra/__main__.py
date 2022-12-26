@@ -1,29 +1,11 @@
-"""An AWS Python Pulumi program"""
-
-from pulumi import Config, export, get_stack
-from pulumi_aws import s3
-
+from pulumi import Config, get_stack
 
 config = Config()
-bucket_config = config.require_object("bucket")
 stack = get_stack()
+feature_flags = config.get_object("modules", {})
 
-cors_rules = None
-if bucket_config.get("cors"):
-    cors_rules = [
-        s3.BucketCorsRuleArgs(
-            allowed_headers=["*"],
-            allowed_methods=bucket_config["cors"]["allowed_methods"],
-            allowed_origins=["*"],
-            expose_headers=["ETag"],
-            max_age_seconds=3600,
-        )
-    ]
+if feature_flags.get("bucket"):
+    from bucket import bucket
 
-bucket = s3.Bucket(
-    f"{bucket_config['name']}-{stack}",
-    versioning=s3.BucketVersioningArgs(enabled=bucket_config["versioning"]["enabled"]),
-    cors_rules=cors_rules,
-)
-
-export("bucket_name", bucket.id)
+if feature_flags.get("bucket_object"):
+    from bucket_object import bucketObject

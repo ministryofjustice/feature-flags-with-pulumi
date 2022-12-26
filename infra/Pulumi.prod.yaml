@@ -3,5 +3,3 @@ config:
   aws:region: eu-west-1
   infra:bucket:
     name: my-bucket
-    versioning:
-      enabled: false
