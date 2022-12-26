@@ -1,8 +1,7 @@
 encryptionsalt: v1:KRgElCNXC34=:v1:bGSOzphsLGwRREVo:snmhFqz+vjjEAdIQtEp/RmcLLr7rZw==
 config:
   aws:region: eu-west-1
-  infra:modules:
-    bucket: true
+  infra:feature_flags:
     bucket_object: true
   infra:bucket:
     name: my-bucket

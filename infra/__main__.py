@@ -1,11 +1,10 @@
-from pulumi import Config, get_stack
+from pulumi import Config
 
 config = Config()
-stack = get_stack()
-feature_flags = config.get_object("modules", {})
+feature_flags = config.get_object("feature_flags", {})
 
-if feature_flags.get("bucket"):
-    from bucket import bucket
+
+from bucket import bucket
 
 if feature_flags.get("bucket_object"):
     from bucket_object import bucketObject

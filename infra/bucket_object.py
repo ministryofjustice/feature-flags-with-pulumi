@@ -1,4 +1,4 @@
-from pulumi import Config, export, get_stack, FileAsset, Output
+from pulumi import Config, get_stack, FileAsset
 from pulumi_aws.s3 import (
     BucketObject,
 )
@@ -6,7 +6,6 @@ from pulumi_aws.s3 import (
 from bucket import bucket
 
 config = Config()
-bucket_config = config.require_object("bucket")
 bucket_object_config = config.get_object("bucket_object", {})
 stack = get_stack()
 
@@ -18,5 +17,3 @@ bucketObject = BucketObject(
     bucket=bucket.id,
     source=FileAsset(f"{stack}/index.html"),
 )
-
-export("bucket_endpoint", Output.concat("http://", bucket.website_endpoint))
