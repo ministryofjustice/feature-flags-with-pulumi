@@ -2,3 +2,5 @@ name: infra
 description: A minimal AWS Python Pulumi program
 runtime:
     name: python
+backend:
+    url: file://..
