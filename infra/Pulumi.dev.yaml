@@ -1,7 +1,9 @@
-encryptionsalt: v1:EKFbgrQbPI8=:v1:MzAyafF3DkMJJfCa:Z6NUt3J+AbyYfVOHabbLsdxlqeOC8g==
 config:
   aws:region: eu-west-1
   infra:feature_flags:
     bucket_object: true
-  infra:bucket:
-    name: my-bucket
+    public_website: true
+  infra:bucket: my-bucket
+  infra:bucket_object:
+    acl: public-read
+    content_type: text/html

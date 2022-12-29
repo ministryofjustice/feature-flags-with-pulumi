@@ -12,8 +12,8 @@ stack = get_stack()
 
 bucketObject = BucketObject(
     "index.html",
-    acl=bucket_object_config.get("acl"),
-    content_type="text/html",
     bucket=bucket.id,
     source=FileAsset(f"{stack}/index.html"),
+    acl=bucket_object_config.get("acl"),
+    content_type=bucket_object_config.get("content_type"),
 )
