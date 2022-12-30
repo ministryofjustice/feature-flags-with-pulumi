@@ -1,10 +1,10 @@
 from pulumi import Config
 
 config = Config()
-feature_flags = config.get_object("feature_flags", {})
+feature_flags = config.get("feature_flags", [])
 
 
 from bucket import bucket
 
-if feature_flags.get("bucket_object"):
+if "bucket_object_flag" in feature_flags:
     from bucket_object import bucketObject

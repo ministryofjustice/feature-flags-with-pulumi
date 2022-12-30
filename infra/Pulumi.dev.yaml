@@ -1,9 +1,8 @@
 config:
   aws:region: eu-west-1
   infra:feature_flags:
-    bucket_object: true
-    public_website: true
-  infra:bucket: my-bucket
+    - bucket_object_flag
+    - public_website_flag
   infra:bucket_object:
     acl: public-read
     content_type: text/html

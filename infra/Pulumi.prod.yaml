@@ -1,3 +1,2 @@
 config:
   aws:region: eu-west-1
-  infra:bucket: my-bucket
