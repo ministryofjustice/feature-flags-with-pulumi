@@ -4,7 +4,10 @@ config = Config()
 feature_flags = config.get("feature_flags", [])
 
 
-from bucket import bucket
+import bucket
 
 if "bucket_object_flag" in feature_flags:
-    from bucket_object import bucketObject
+    import bucket_object
+
+if "public_website_flag" in feature_flags:
+    import bucket_policy

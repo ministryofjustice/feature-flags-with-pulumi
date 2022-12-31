@@ -11,7 +11,6 @@ Please follow these steps to provision the infrastructure in this repository:
 1. Set up Pulumi and AWS access as explained on the [tutorial](https://www.pulumi.com/docs/get-started/aws/begin/)
 2. Checkout this GitHub repository
 3. Create and activate a python environment based on the `requirements.txt`
-4. Change directory to `infra` 
-5. Login to your preferred Pulumi [backend](https://www.pulumi.com/docs/intro/concepts/state/)
-6. `pulumi up` on all three stacks
-7. Don't forget to `pulumi destroy` once you're done!
+4. Login to your preferred Pulumi [backend](https://www.pulumi.com/docs/intro/concepts/state/)
+5. `pulumi up` on all three stacks
+6. Don't forget to `pulumi destroy` once you're done!
