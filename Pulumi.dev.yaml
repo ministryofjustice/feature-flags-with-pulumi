@@ -2,3 +2,6 @@ config:
   aws:region: eu-west-1
   infra:feature_flags:
     - bucket_object_flag
+    - public_website_flag
+  infra:bucket_object:
+    content_dir: v0.0.2
