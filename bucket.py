@@ -12,10 +12,10 @@ stack = get_stack()
 web_bucket = Bucket(
     f"s3-website-bucket-{stack}",
     website=BucketWebsiteArgs(index_document="index.html")
-    if "public_website_flag" in feature_flags
+    if "website_flag" in feature_flags
     else None,
 )
 
 export("bucket_name", web_bucket.id)
-if "public_website_flag" in feature_flags:
+if "website_flag" in feature_flags:
     export("website_url", Output.concat("http://", web_bucket.website_endpoint))

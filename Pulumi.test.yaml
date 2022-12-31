@@ -2,6 +2,7 @@ config:
   aws:region: eu-west-1
   infra:feature_flags:
     - website_flag
+    # make sure to remove acl setting!
+    - bucket_policy_flag
   infra:bucket_object:
     version: v0.0.2
-    acl: 'public-read'
