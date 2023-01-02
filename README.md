@@ -12,5 +12,5 @@ Please follow these steps to provision the infrastructure in this repository:
 2. Checkout this GitHub repository
 3. Create and activate a python environment based on the `requirements.txt`
 4. Login to your preferred Pulumi [backend](https://www.pulumi.com/docs/intro/concepts/state/)
-5. `pulumi up` on all three stacks
-6. Don't forget to `pulumi destroy` once you're done!
+5. `pulumi up` on all stacks
+6. Don't forget to `pulumi destroy` all stacks once you're done!
