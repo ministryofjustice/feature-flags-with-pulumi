@@ -5,12 +5,14 @@ from pulumi_aws.s3 import (
 )
 
 config = Config()
-feature_flags = config.get("feature_flags", [])
+feature_flags = config.get_object("feature_flags", [])
+aws_config = Config("aws")
+region = aws_config.require("region")
 stack = get_stack()
 
 
 web_bucket = Bucket(
-    f"s3-website-bucket-{stack}",
+    f"s3-website-bucket-{stack}-{region}",
     website=BucketWebsiteArgs(index_document="index.html")
     if "website_flag" in feature_flags
     else None,
