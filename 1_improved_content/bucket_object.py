@@ -19,5 +19,5 @@ for file in os.listdir(content_dir):
         bucket=web_bucket.id,
         source=FileAsset(filepath),
         content_type=mime_type,
-        acl=bucket_object_config.get("acl"),
+        acl="public-read",
     )

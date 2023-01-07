@@ -1,4 +1,4 @@
 config:
   aws:region: eu-west-1
-  infra:bucket_object:
-    acl: public-read
+  infra:feature_flags:
+    - bucket_policy_flag

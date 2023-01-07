@@ -1,4 +1,2 @@
 config:
   aws:region: eu-west-1
-  infra:feature_flags:
-    - bucket_policy_flag
