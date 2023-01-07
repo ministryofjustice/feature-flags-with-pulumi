@@ -1,7 +1,6 @@
-from pulumi import Config, export, get_stack, Output, FileAsset
+from pulumi import Config, export, get_stack, Output
 from pulumi_aws.s3 import (
     Bucket,
-    BucketObject,
     BucketWebsiteArgs,
 )
 
@@ -13,17 +12,7 @@ stack = get_stack()
 
 web_bucket = Bucket(
     f"s3-website-bucket-{stack}-{region}",
-    website=BucketWebsiteArgs(
-        index_document="index.html",
-    ),
-)
-
-bucket_object = BucketObject(
-    "index.html",
-    bucket=web_bucket.id,
-    source=FileAsset("index.html"),
-    content_type="text/html",
-    acl="public-read",
+    website=BucketWebsiteArgs(index_document="index.html"),
 )
 
 export("bucket_name", web_bucket.id)
