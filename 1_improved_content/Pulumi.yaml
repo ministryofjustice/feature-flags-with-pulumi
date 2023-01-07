@@ -1,0 +1,4 @@
+name: infra
+description: Implementing feature flags with a minimal AWS Python Pulumi program
+runtime:
+    name: python
