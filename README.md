@@ -1,14 +1,6 @@
 # Feature Flags (AKA Toggles) with Pulumi
 
-This repository demonstrates how to implement feature flags with a minimal AWS Python Pulumi infrastructure-as-code program. 
-
-The repository exploits the Pulumi configuration system to deploy stacks with optional features while maintaining a single source code branch:
-
-![Feature flags infrastructure-as-code](feature_flags.drawio.png)
-
-The repository uses a simple S3 static website example with two features and two stacks:
-
-![Example structure](example_structure.drawio.png)
+This repository demonstrates how to implement feature flags with a minimal AWS Python Pulumi infrastructure-as-code program.
 
 For more details please refer to the [accompanying article](https://medium.com/@soumaya-mauthoor/feature-flags-with-pulumi-df578fc9ea43).
 

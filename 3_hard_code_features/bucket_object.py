@@ -9,7 +9,7 @@ from bucket import web_bucket
 config = Config()
 bucket_object_config = config.get_object("bucket_object", {})
 
-content_dir = f"www"
+content_dir = "www"
 for file in os.listdir(content_dir):
     filepath = os.path.join(content_dir, file)
     mime_type, _ = mimetypes.guess_type(filepath)
